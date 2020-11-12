@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="CarShopControllerTest" tests="5" skipped="0" failures="0" errors="0" timestamp="2020-11-06T08:32:25" hostname="DESKTOP-9U5H4BF" time="0.016">
+  <properties/>
+  <testcase name="createNewClientWithoutCarShouldReturn400WhenClientAlreadyExists" classname="CarShopControllerTest" time="0.01"/>
+  <testcase name="disableClientAccountWithClientActiveShouldReturn200AndClient" classname="CarShopControllerTest" time="0.001"/>
+  <testcase name="disableClientAccountWithNoClientShouldReturn404" classname="CarShopControllerTest" time="0.001"/>
+  <testcase name="disableClientAccountWithClientInactiveShouldReturn400" classname="CarShopControllerTest" time="0.001"/>
+  <testcase name="createNewClientWithCarShouldReturn200AndClientWithCar" classname="CarShopControllerTest" time="0.001"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>
