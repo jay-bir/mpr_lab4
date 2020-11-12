@@ -1,3 +1,4 @@
+import enums.PaymentType;
 import exception.ClientAlreadyExistsException;
 import exception.ClientAlreadyInactiveException;
 import exception.ClientNotFoundException;
@@ -7,7 +8,7 @@ import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
 import static org.junit.Assert.*;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @RunWith(MockitoJUnitRunner.class)
 public class CarShopControllerTest {
@@ -95,5 +96,102 @@ public class CarShopControllerTest {
         assertEquals(clientId, response.getClient().getId());
         assertTrue(response.getClient().isActive());
         assertNull(response.getClient().getCar());
+    }
+
+
+    @Test
+    public void updateClientAccountIdTestNoClientExpected404ResponseStatus(){
+        String clientId = "12345";
+        String newClientId = "54321";
+        CarShopController carShopController = new CarShopController(clientService, carService, paymentService);
+
+        when(clientService.updateClientAccountId(clientId, newClientId)).thenThrow(ClientNotFoundException.class);
+
+        Response response = carShopController.updateClientAccountId(clientId, newClientId);
+
+        assertEquals(404,response.getStatus());
+        assertNull(response.getClient());
+    }
+
+    @Test
+    public void updateClientAccountIdTestWithClientExpected200ResponseAndClient(){
+        String clientId = "12345";
+        String newClientId = "54321";
+        Client client = new Client(clientId,true,null);
+        CarShopController carShopController = new CarShopController(clientService, carService, paymentService);
+
+        when(clientService.updateClientAccountId(clientId,newClientId)).thenReturn(client);
+
+        Response response = carShopController.updateClientAccountId(clientId, newClientId);
+
+        assertEquals(200,response.getStatus());
+        assertEquals(clientId, response.getClient().getId());
+        assertTrue(response.getClient().isActive());
+        assertNull(response.getClient().getCar());
+    }
+
+    @Test
+    public void registerClientCarWithCoClientExpected404ResponseStatus(){
+        String clientId = "12345";
+        String carMake = "FastestCars";
+        String carColor = "Red";
+        String carPlate = "12345";
+
+        CarShopController carShopController = new CarShopController(clientService, carService, paymentService);
+
+        when(carService.registerClientCar(clientId, carMake,carColor,carPlate)).thenThrow(ClientNotFoundException.class);
+
+        Response response = carShopController.registerClientCar(clientId, carMake,carColor,carPlate);
+
+        assertEquals(404,response.getStatus());
+        assertNull(response.getClient());
+    }
+
+    @Test
+    public void registerClientCarWithClientExpected200ResponseStatusAndClient(){
+        String clientId = "12345";
+        String carMake = "FastestCars";
+        String carColor = "Red";
+        String carPlate = "12345";
+        Car car = new Car();
+        car.setMake(carMake);
+        car.setColor(carColor);
+        Client client = new Client(clientId, true, car);
+
+        CarShopController carShopController = new CarShopController(clientService, carService, paymentService);
+
+        when(carService.registerClientCar(clientId, carMake, carColor, carPlate)).thenReturn(client);
+
+        Response response = carShopController.registerClientCar(clientId, carMake, carColor, carPlate);
+
+        assertEquals(200, response.getStatus());
+        assertEquals(clientId, response.getClient().getId());
+        assertEquals(carMake, response.getClient().getCar().getMake());
+        assertEquals(carColor, response.getClient().getCar().getColor());
+        assertTrue(response.getClient().isActive());
+    }
+
+    @Test
+    public void processPaymentTestWithCarPaymentExpected201ResponseStatusAndOneCallCarServiceSavepaymentMethod(){
+        PaymentType paymentType = PaymentType.CAR_PAYMENT;
+        Payment payment = new Payment();
+        payment.setType(paymentType);
+        CarShopController carShopController = new CarShopController(clientService, carService, paymentService);
+
+        Response response = carShopController.processPayment(payment);
+        assertEquals(201,response.getStatus());
+        verify(carService,only()).savePayment(payment);
+    }
+
+    @Test
+    public void processPaymentTestWithCarPaymentExpected201ResponseStatusAndOneCallPaymentServiceSavepaymentMethod(){
+        PaymentType paymentType = PaymentType.REGISTRATION_PAYMENT;
+        Payment payment = new Payment();
+        payment.setType(paymentType);
+        CarShopController carShopController = new CarShopController(clientService, carService, paymentService);
+
+        Response response = carShopController.processPayment(payment);
+        assertEquals(201,response.getStatus());
+        verify(paymentService,only()).savePayment(payment);
     }
 }
